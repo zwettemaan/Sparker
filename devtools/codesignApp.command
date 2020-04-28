@@ -10,6 +10,16 @@ export PROJECT_SOURCE_DIR="${PROJECT_ROOT_DIR}SparkerConfig/"
 
 export PLIST_ENTITLEMENTS_FILE="${PROJECT_SOURCE_DIR}SparkerConfig.entitlements.plist"
 
+#
+# The macCodeSignID.txt file is missing, and that's by design. You need to add your own file. 
+#
+# It contains a single line similar to:
+#
+#    Developer ID Application: Rorohiko Ltd. (ABCDEF12345)
+#
+# which is my Apple developer ID for codesigning. You need your own code signing identity - you cannot use mine
+#
+
 export CODESIGN_ID=`head -n 1 macCodeSignID.txt`
 
 cd "${PROJECT_ROOT_DIR}SparkerConfig/Builds - SparkerConfig/OS X 64 bit/"
