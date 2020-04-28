@@ -578,10 +578,6 @@ End
 		      
 		      ProcessMap
 		      
-		      for guidIdx as integer = 1 to kProjectGUIDCount
-		        fPlaceholderDict.Value(kPlaceholderPrefix_PROJECT_GUID + Str(guidIdx)) = GetGUIDStr()
-		      next
-		      
 		      GenerateProjectItemFromTemplate fTemplatesFolder, fProjectRootFolder
 		      
 		      Dim buildSettingsFolder as FolderItem
@@ -2283,9 +2279,6 @@ End
 	#tag Constant, Name = kPlaceHolderPrefix_IsBuildSetting, Type = String, Dynamic = False, Default = \"IS_BUILDSETTING_", Scope = Public
 	#tag EndConstant
 
-	#tag Constant, Name = kPlaceholderPrefix_PROJECT_GUID, Type = String, Dynamic = False, Default = \"PROJECT_ADDITIONAL_GUID_", Scope = Public
-	#tag EndConstant
-
 	#tag Constant, Name = kPlaceHolderPrefix_SelectionList, Type = String, Dynamic = False, Default = \"SELECT_", Scope = Public
 	#tag EndConstant
 
@@ -2356,9 +2349,6 @@ End
 	#tag EndConstant
 
 	#tag Constant, Name = kPreprocessorCommand_Or, Type = String, Dynamic = False, Default = \"$Or", Scope = Public
-	#tag EndConstant
-
-	#tag Constant, Name = kProjectGUIDCount, Type = Double, Dynamic = False, Default = \"4", Scope = Public
 	#tag EndConstant
 
 
