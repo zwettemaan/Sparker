@@ -579,16 +579,7 @@ End
 		      ProcessMap
 		      
 		      for guidIdx as integer = 1 to kProjectGUIDCount
-		        
-		        Dim guid as UUIDMBS
-		        guid = UUIDMBS.randomUUID
-		        
-		        Dim formatted as String
-		        formatted = guid.ValueFormattedString()
-		        
-		        formatted = Mid(formatted, 2, Len(formatted) - 2)
-		        
-		        fPlaceholderDict.Value(kPlaceholderPrefix_PROJECT_GUID + Str(guidIdx)) = formatted
+		        fPlaceholderDict.Value(kPlaceholderPrefix_PROJECT_GUID + Str(guidIdx)) = GetGUIDStr()
 		      next
 		      
 		      GenerateProjectItemFromTemplate fTemplatesFolder, fProjectRootFolder
@@ -994,6 +985,32 @@ End
 		      end if
 		      
 		      retVal = in_dict.Value(in_dictKey)
+		      
+		    catch e as RuntimeException
+		      LogError CurrentMethodName, "Throws " + e.Message
+		    end try
+		    
+		  Loop until true
+		  
+		  return retVal
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function GetGUIDStr() As String
+		  Dim retVal as String
+		  
+		  do 
+		    
+		    try 
+		      
+		      Dim guid as UUIDMBS
+		      guid = UUIDMBS.randomUUID
+		      
+		      Dim formatted as String
+		      formatted = guid.ValueFormattedString()
+		      
+		      retVal = Mid(formatted, 2, Len(formatted) - 2)
 		      
 		    catch e as RuntimeException
 		      LogError CurrentMethodName, "Throws " + e.Message
@@ -1493,6 +1510,13 @@ End
 		              placeholder = Mid(placeholder, kPlaceHolderPrefix_IsBuildSetting.Len + 1)
 		              io_isBuildSetting.Value(placeholder) = Val(value) <> 0
 		            else
+		              Dim replacedValue as String
+		              replacedValue = value
+		              value = ""
+		              while replacedValue <> value 
+		                value = replacedValue
+		                replacedValue = replacedValue.Replace(kPlaceholderValue_GenerateGUID, GetGUIDStr())
+		              wend
 		              io_placeholders.Value(placeholder) = value
 		            end if
 		          end if
@@ -2259,10 +2283,13 @@ End
 	#tag Constant, Name = kPlaceHolderPrefix_IsBuildSetting, Type = String, Dynamic = False, Default = \"IS_BUILDSETTING_", Scope = Public
 	#tag EndConstant
 
-	#tag Constant, Name = kPlaceholderPrefix_PROJECT_GUID, Type = String, Dynamic = False, Default = \"PROJECT_GUID_", Scope = Public
+	#tag Constant, Name = kPlaceholderPrefix_PROJECT_GUID, Type = String, Dynamic = False, Default = \"PROJECT_ADDITIONAL_GUID_", Scope = Public
 	#tag EndConstant
 
 	#tag Constant, Name = kPlaceHolderPrefix_SelectionList, Type = String, Dynamic = False, Default = \"SELECT_", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = kPlaceholderValue_GenerateGUID, Type = String, Dynamic = False, Default = \"$!GENERATE_GUID!$", Scope = Public
 	#tag EndConstant
 
 	#tag Constant, Name = kPlaceholder_DESPACED_TARGET_NAME, Type = String, Dynamic = False, Default = \"DESPACED_TARGET_NAME", Scope = Public
