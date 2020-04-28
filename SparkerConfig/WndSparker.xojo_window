@@ -578,6 +578,19 @@ End
 		      
 		      ProcessMap
 		      
+		      for guidIdx as integer = 1 to kProjectGUIDCount
+		        
+		        Dim guid as UUIDMBS
+		        guid = UUIDMBS.randomUUID
+		        
+		        Dim formatted as String
+		        formatted = guid.ValueFormattedString()
+		        
+		        formatted = Mid(formatted, 2, Len(formatted) - 2)
+		        
+		        fPlaceholderDict.Value(kPlaceholderPrefix_PROJECT_GUID + Str(guidIdx)) = formatted
+		      next
+		      
 		      GenerateProjectItemFromTemplate fTemplatesFolder, fProjectRootFolder
 		      
 		      Dim buildSettingsFolder as FolderItem
@@ -2246,10 +2259,10 @@ End
 	#tag Constant, Name = kPlaceHolderPrefix_IsBuildSetting, Type = String, Dynamic = False, Default = \"IS_BUILDSETTING_", Scope = Public
 	#tag EndConstant
 
-	#tag Constant, Name = kPlaceHolderPrefix_SelectionList, Type = String, Dynamic = False, Default = \"SELECT_", Scope = Public
+	#tag Constant, Name = kPlaceholderPrefix_PROJECT_GUID, Type = String, Dynamic = False, Default = \"PROJECT_GUID_", Scope = Public
 	#tag EndConstant
 
-	#tag Constant, Name = kPlaceholder_CEPVERSION, Type = String, Dynamic = False, Default = \"CEPVERSION", Scope = Public
+	#tag Constant, Name = kPlaceHolderPrefix_SelectionList, Type = String, Dynamic = False, Default = \"SELECT_", Scope = Public
 	#tag EndConstant
 
 	#tag Constant, Name = kPlaceholder_DESPACED_TARGET_NAME, Type = String, Dynamic = False, Default = \"DESPACED_TARGET_NAME", Scope = Public
@@ -2316,6 +2329,9 @@ End
 	#tag EndConstant
 
 	#tag Constant, Name = kPreprocessorCommand_Or, Type = String, Dynamic = False, Default = \"$Or", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = kProjectGUIDCount, Type = Double, Dynamic = False, Default = \"4", Scope = Public
 	#tag EndConstant
 
 
