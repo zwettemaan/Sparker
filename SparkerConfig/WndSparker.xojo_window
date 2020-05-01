@@ -663,6 +663,12 @@ End
 		      winConfigSettingsTos.WriteLine "SET " + kPlaceholder_TARGET_APP + "=" + targetApp
 		      specialKeyDict.Value(kPlaceholder_TARGET_APP) = true
 		      
+		      Dim targetFileNameExtension as String
+		      targetFileNameExtension = GetFromDict(fPlaceholderDict, kPlaceholder_TARGET_FILENAME_EXTENSION, kDefault_TARGET_FILENAME_EXTENSION)
+		      macConfigSettingsTos.WriteLine "export " + kPlaceholder_TARGET_FILENAME_EXTENSION + "=" + dQ(targetFileNameExtension)
+		      winConfigSettingsTos.WriteLine "SET " + kPlaceholder_TARGET_FILENAME_EXTENSION + "=" + targetFileNameExtension
+		      specialKeyDict.Value(kPlaceholder_TARGET_FILENAME_EXTENSION) = true
+		      
 		      Dim targetAppCode as String
 		      targetAppCode = GetFromDict(fPlaceholderDict, kPlaceholder_TARGET_APP_CODE, kDefault_TARGET_APP_CODE)
 		      macConfigSettingsTos.WriteLine "export " + kPlaceholder_TARGET_APP_CODE + "=" + dQ(targetAppCode)
@@ -1803,6 +1809,18 @@ End
 		        
 		        fPlaceholderDict.Value(kPlaceholder_TARGET_APP_CODE) = targetAppCode
 		        
+		        Dim targetFileNameExtensionJSON as JSONMBS
+		        targetFileNameExtensionJSON = appDataJSON.Child(kPlaceholder_TARGET_FILENAME_EXTENSION)
+		        if targetFileNameExtensionJSON = nil then
+		          LogError CurrentMethodName, "TARGET_FILENAME_EXTENSION missing"
+		          Exit
+		        end if
+		        
+		        Dim targetFileNameExtension as String
+		        targetFileNameExtension = targetFileNameExtensionJSON.ValueString()
+		        
+		        fPlaceholderDict.Value(kPlaceholder_TARGET_FILENAME_EXTENSION) = targetFileNameExtension
+		        
 		        Dim appVersionsJSON as JSONMBS
 		        appVersionsJSON = appDataJSON.Child(kPlaceholder_TARGET_CC_VERSION)
 		        if appVersionsJSON = nil then
@@ -2207,6 +2225,9 @@ End
 	#tag Constant, Name = kDefault_TARGET_DIRNAME, Type = String, Dynamic = False, Default = \"Sparker", Scope = Public
 	#tag EndConstant
 
+	#tag Constant, Name = kDefault_TARGET_FILENAME_EXTENSION, Type = String, Dynamic = False, Default = \"jsx", Scope = Public
+	#tag EndConstant
+
 	#tag Constant, Name = kDefault_TARGET_NAME, Type = String, Dynamic = False, Default = \"Sparker", Scope = Public
 	#tag EndConstant
 
@@ -2328,6 +2349,9 @@ End
 	#tag EndConstant
 
 	#tag Constant, Name = kPlaceholder_TARGET_DIRNAME, Type = String, Dynamic = False, Default = \"TARGET_DIRNAME", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = kPlaceholder_TARGET_FILENAME_EXTENSION, Type = String, Dynamic = False, Default = \"TARGET_FILENAME_EXTENSION", Scope = Public
 	#tag EndConstant
 
 	#tag Constant, Name = kPlaceholder_TARGET_NAME, Type = String, Dynamic = False, Default = \"TARGET_NAME", Scope = Public
