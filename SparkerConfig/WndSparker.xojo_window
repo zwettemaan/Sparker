@@ -1110,10 +1110,11 @@ End
 		      fSelectionListDict = new Dictionary
 		      fIsAdvancedDict = new Dictionary
 		      fIsBuildSettingDict = new Dictionary
+		      fIsInternalDict = new Dictionary
 		      
 		      ExtractPlaceholdersFromTemplates fTemplatesFolder, fPlaceholderDict, fSelectionListDict
 		      
-		      ParseConfigFile fPlaceholderDict, fHelpStringDict, fSelectionListDict, fIsAdvancedDict, fIsBuildSettingDict
+		      ParseConfigFile fPlaceholderDict, fHelpStringDict, fSelectionListDict, fIsAdvancedDict, fIsInternalDict, fIsBuildSettingDict
 		      
 		      WndSparker.Title = fWindowTitle
 		      
@@ -1436,7 +1437,7 @@ End
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub ParseConfigFile(io_placeholders as Dictionary, io_helpStrings as Dictionary, io_selectionList as Dictionary, io_isAdvanced as Dictionary, io_isBuildSetting as Dictionary)
+		Sub ParseConfigFile(io_placeholders as Dictionary, io_helpStrings as Dictionary, io_selectionList as Dictionary, io_isAdvanced as Dictionary, io_isInternal as Dictionary, io_isBuildSetting as Dictionary)
 		  do 
 		    
 		    try 
@@ -1499,6 +1500,9 @@ End
 		            if placeholder = kPlaceholder_SPARKER_PROJECT_NAME then
 		              fWindowTitle = value
 		              fNamePrefix_SparkerProject = fWindowTitle.ReplaceAll(" ", "")
+		            elseif StartsWith(kPlaceHolderPrefix_IsInternal, placeholder) then
+		              placeholder = Mid(placeholder, kPlaceHolderPrefix_IsAdvanced.Len + 1)
+		              io_isInternal.Value(placeholder) = Val(value) <> 0
 		            elseif StartsWith(kPlaceHolderPrefix_Help, placeholder) then
 		              placeholder = Mid(placeholder, kPlaceHolderPrefix_Help.Len + 1)
 		              io_helpStrings.Value(placeholder) = value
@@ -1750,11 +1754,11 @@ End
 		      Dim mapJSONStr as String
 		      mapJSONStr = ReadFileText(mapFile)
 		      
-		      Dim json as JSONMBS
-		      json = new JSONMBS(mapJSONStr)
+		      Dim mapJSON as JSONMBS
+		      mapJSON = new JSONMBS(mapJSONStr)
 		      
 		      Dim defaultForAnyJSON as JSONMBS
-		      defaultForAnyJSON = json.Child("defaultForAny")
+		      defaultForAnyJSON = mapJSON.Child(kMapKey_DefaultForAny)
 		      
 		      Dim defaultForAny as String
 		      if defaultForAnyJSON = nil then
@@ -1791,7 +1795,7 @@ End
 		      if targetApp <> kAnyValue_TARGET_APP then
 		        
 		        Dim appDataJSON as JSONMBS
-		        appDataJSON = json.Child(targetApp)
+		        appDataJSON = mapJSON.Child(targetApp)
 		        if appDataJSON = nil then
 		          LogError CurrentMethodName, "app is not mapped"
 		          Exit
@@ -1838,8 +1842,9 @@ End
 		        Dim appVersion as String
 		        appVersion = appVersionJSON.ValueString()
 		        
+		        Dim iter as JSONMBS
+		        
 		        if targetCCVersionSelected = kAnyValue_TARGET_CC_VERSION then
-		          Dim iter as JSONMBS
 		          iter = appVersionsJSON.ChildNode
 		          while iter <> nil 
 		            if iter.ValueString() = appVersion and iter.Name <> kAnyValue_TARGET_CC_VERSION then
@@ -1850,6 +1855,29 @@ End
 		            end if
 		          wend
 		        end if
+		        
+		        Dim appMapperScript as String
+		        appMapperScript = appMapperScript + "function mapAppId(appId) {"
+		        appMapperScript = appMapperScript +     "var retVal;"
+		        appMapperScript = appMapperScript +     "switch (appId) {"
+		        iter = mapJSON.ChildNode
+		        while iter <> nil 
+		          if iter.Name <> kMapKey_DefaultForAny then
+		            Dim appCode as JSONMBS
+		            appCode = iter.Child(kPlaceholder_TARGET_APP_CODE)
+		            if appCode <> nil then
+		              appMapperScript = appMapperScript +         "case """ + appCode.ValueString() + """:"
+		              appMapperScript = appMapperScript +             "retVal = """ + iter.Name + """;"
+		              appMapperScript = appMapperScript +             "break;"
+		            end if
+		          end if
+		          iter = iter.nextNode
+		        wend
+		        appMapperScript = appMapperScript +     "}"
+		        appMapperScript = appMapperScript +     "return retVal;"
+		        appMapperScript = appMapperScript + "}"
+		        
+		        fPlaceholderDict.Value(kPlaceholder_APP_MAPPER_SCRIPT) = appMapperScript
 		        
 		        fPlaceholderDict.Value(kPlaceholder_TARGET_CC_VERSION) = targetCCVersion
 		        fPlaceholderDict.Value(kPlaceholder_TARGET_CC_VERSION_SELECTED) = targetCCVersionSelected
@@ -2125,15 +2153,17 @@ End
 		      Dim placeholder as String
 		      placeholder = fPlaceholders(idx)
 		      
-		      if showAdvanced or not(fIsAdvancedDict.HasKey(placeholder) and fIsAdvancedDict.Value(placeholder)) then
-		        LstConfigStrings.AddRow placeholder
-		        
-		        Dim row as Integer
-		        row = LstConfigStrings.ListCount - 1
-		        
-		        if fPlaceholderDict.HasKey(placeholder)  then
-		          LstConfigStrings.Cell(row,1) = fPlaceholderDict.Value(placeholder)
-		          LstConfigStrings.CellType(row, 1) = Listbox.TypeEditableTextField
+		      if not (fIsInternalDict.HasKey(placeholder) and fIsInternalDict.Value(placeholder)) then
+		        if showAdvanced or not (fIsAdvancedDict.HasKey(placeholder) and fIsAdvancedDict.Value(placeholder)) then
+		          LstConfigStrings.AddRow placeholder
+		          
+		          Dim row as Integer
+		          row = LstConfigStrings.ListCount - 1
+		          
+		          if fPlaceholderDict.HasKey(placeholder)  then
+		            LstConfigStrings.Cell(row,1) = fPlaceholderDict.Value(placeholder)
+		            LstConfigStrings.CellType(row, 1) = Listbox.TypeEditableTextField
+		          end if
 		        end if
 		      end if
 		      
@@ -2162,6 +2192,10 @@ End
 
 	#tag Property, Flags = &h0
 		fIsBuildSettingDict As Dictionary
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		fIsInternalDict As Dictionary
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -2288,6 +2322,9 @@ End
 	#tag Constant, Name = kLogLevel_Warning, Type = Double, Dynamic = False, Default = \"2", Scope = Public
 	#tag EndConstant
 
+	#tag Constant, Name = kMapKey_DefaultForAny, Type = String, Dynamic = False, Default = \"defaultForAny", Scope = Public
+	#tag EndConstant
+
 	#tag Constant, Name = kPlaceholderPrefixSuffix, Type = String, Dynamic = False, Default = \"$$", Scope = Public
 	#tag EndConstant
 
@@ -2300,10 +2337,16 @@ End
 	#tag Constant, Name = kPlaceHolderPrefix_IsBuildSetting, Type = String, Dynamic = False, Default = \"IS_BUILDSETTING_", Scope = Public
 	#tag EndConstant
 
+	#tag Constant, Name = kPlaceHolderPrefix_IsInternal, Type = String, Dynamic = False, Default = \"IS_INTERNAL_", Scope = Public
+	#tag EndConstant
+
 	#tag Constant, Name = kPlaceHolderPrefix_SelectionList, Type = String, Dynamic = False, Default = \"SELECT_", Scope = Public
 	#tag EndConstant
 
 	#tag Constant, Name = kPlaceholderValue_GenerateGUID, Type = String, Dynamic = False, Default = \"$!GENERATE_GUID!$", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = kPlaceholder_APP_MAPPER_SCRIPT, Type = String, Dynamic = False, Default = \"APP_MAPPER_SCRIPT", Scope = Public
 	#tag EndConstant
 
 	#tag Constant, Name = kPlaceholder_DESPACED_TARGET_NAME, Type = String, Dynamic = False, Default = \"DESPACED_TARGET_NAME", Scope = Public
