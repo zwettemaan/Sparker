@@ -355,6 +355,36 @@ End
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub ExtractDataFromUI()
+		  do
+		    
+		    try 
+		      
+		      
+		      Dim maxPlaceholderIdx as Integer
+		      maxPlaceholderIdx = LstConfigStrings.ListCount - 1
+		      
+		      for idx as integer = 0 to maxPlaceholderIdx
+		        
+		        Dim placeholder as String
+		        placeholder = LstConfigStrings.Cell(idx,0)
+		        
+		        Dim value as String
+		        value = LstConfigStrings.Cell(idx,1)
+		        
+		        fPlaceholderDict.Value(placeholder) = value
+		        
+		      next
+		      
+		    catch e as RuntimeException
+		      LogError CurrentMethodName, "Throws " + e.Message
+		    end try
+		    
+		  Loop Until true
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub ExtractPlaceholdersFromFile(in_textFile as FolderItem, io_placeholders as Dictionary)
 		  do 
 		    
@@ -1032,6 +1062,7 @@ End
 
 	#tag Method, Flags = &h0
 		Sub Handle_BtnGenerate_Action()
+		  ExtractDataFromUI
 		  Generate
 		  AppQuit
 		  
@@ -1040,6 +1071,7 @@ End
 
 	#tag Method, Flags = &h0
 		Sub Handle_ChkShowAdvanced_Action()
+		  ExtractDataFromUI
 		  UpdateUI
 		End Sub
 	#tag EndMethod
@@ -1825,6 +1857,18 @@ End
 		        
 		        fPlaceholderDict.Value(kPlaceholder_TARGET_FILENAME_EXTENSION) = targetFileNameExtension
 		        
+		        Dim appSpecifierJSON as JSONMBS
+		        appSpecifierJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_SPECIFIER)
+		        if appSpecifierJSON = nil then
+		          LogError CurrentMethodName, "TARGET_APP_SPECIFIER missing"
+		          Exit
+		        end if
+		        
+		        Dim appSpecifier as String
+		        appSpecifier = appSpecifierJSON.ValueString()
+		        
+		        fPlaceholderDict.Value(kPlaceholder_TARGET_APP_SPECIFIER) = appSpecifier
+		        
 		        Dim appVersionsJSON as JSONMBS
 		        appVersionsJSON = appDataJSON.Child(kPlaceholder_TARGET_CC_VERSION)
 		        if appVersionsJSON = nil then
@@ -1842,9 +1886,30 @@ End
 		        Dim appVersion as String
 		        appVersion = appVersionJSON.ValueString()
 		        
+		        fPlaceholderDict.Value(kPlaceholder_TARGET_APP_VERSION) = appVersion
+		        
+		        Dim appSpecifierVersionsJSON as JSONMBS
+		        appSpecifierVersionsJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_SPECIFIER_VERSION)
+		        if appSpecifierVersionsJSON = nil then
+		          appSpecifierVersionsJSON = appVersionsJSON
+		        end if
+		        
+		        Dim appSpecifierVersionJSON as JSONMBS
+		        appSpecifierVersionJSON = appSpecifierVersionsJSON.Child(targetCCVersion)
+		        if appSpecifierVersionJSON = nil then
+		          LogError CurrentMethodName, "appSpecifierVersionJSON missing"
+		          Exit
+		        end if
+		        
+		        Dim appSpecifierVersion as String
+		        appSpecifierVersion = appSpecifierVersionJSON.ValueString()
+		        
+		        fPlaceholderDict.Value(kPlaceholder_TARGET_APP_SPECIFIER_VERSION) = appSpecifierVersion
+		        
 		        Dim iter as JSONMBS
 		        
 		        if targetCCVersionSelected = kAnyValue_TARGET_CC_VERSION then
+		          
 		          iter = appVersionsJSON.ChildNode
 		          while iter <> nil 
 		            if iter.ValueString() = appVersion and iter.Name <> kAnyValue_TARGET_CC_VERSION then
@@ -1855,6 +1920,18 @@ End
 		            end if
 		          wend
 		        end if
+		        
+		        Dim targetSpecifierJSON as JSONMBS
+		        targetSpecifierJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_SPECIFIER)
+		        if targetSpecifierJSON = nil then
+		          LogError CurrentMethodName, "TARGET_APP_SPECIFIER) missing"
+		          Exit
+		        end if
+		        
+		        Dim targetSpecifier as String
+		        targetSpecifier = targetSpecifierJSON.ValueString()
+		        
+		        fPlaceholderDict.Value(kPlaceholder_TARGET_APP_SPECIFIER) = targetSpecifier
 		        
 		        Dim appMapperScript as String
 		        appMapperScript = appMapperScript + "function mapAppId(appId) {"
@@ -1873,6 +1950,7 @@ End
 		          end if
 		          iter = iter.nextNode
 		        wend
+		        
 		        appMapperScript = appMapperScript +     "}"
 		        appMapperScript = appMapperScript +     "return retVal;"
 		        appMapperScript = appMapperScript + "}"
@@ -1885,6 +1963,10 @@ End
 		        Dim appVersionPlaceholder as String
 		        appVersionPlaceholder = "TARGET_" + Uppercase(targetApp) + "_VERSION"
 		        fPlaceholderDict.Value(appVersionPlaceholder) = appVersion
+		        
+		        Dim appSpecifierVersionPlaceholder as String
+		        appSpecifierVersionPlaceholder = "TARGET_" + Uppercase(targetApp) + "_SPECIFIER_VERSION"
+		        fPlaceholderDict.Value(appSpecifierVersionPlaceholder) = appSpecifierVersion
 		        
 		        Dim targetAppScriptDirMacJSON as JSONMBS
 		        targetAppScriptDirMacJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_SCRIPT_DIR_MAC)
@@ -1913,10 +1995,19 @@ End
 		        Dim targetAppCpuWordSize as String
 		        targetAppCpuWordSize = GetFromDict(fPlaceholderDict, kPlaceholder_TARGET_APP_CPU_WORDSIZE, kDefault_TARGET_APP_CPU_WORDSIZE)
 		        
-		        Dim targetAppSpecifier as String
-		        targetAppSpecifier = Lowercase(targetApp + "-" + appVersion + targetAppCpuWordSize)
+		        Dim targetAppFullSpecifier as String
+		        Dim targetAppFullSpecifierJSON as JSONMBS
+		        targetAppFullSpecifierJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_FULL_SPECIFIER)
+		        if targetAppFullSpecifierJSON <> nil then
+		          targetAppFullSpecifier = targetAppFullSpecifierJSON.ValueString()
+		          targetAppFullSpecifier = ReplacePlaceholders(targetAppFullSpecifier)
+		        end if
 		        
-		        fPlaceholderDict.Value(kPlaceholder_TARGET_APP_SPECIFIER) = targetAppSpecifier
+		        if targetAppFullSpecifier = "" then
+		          targetAppFullSpecifier = appSpecifier + "-" + appSpecifierVersion + targetAppCpuWordSize
+		        end if
+		        
+		        fPlaceholderDict.Value(kPlaceholder_TARGET_APP_FULL_SPECIFIER) = targetAppFullSpecifier
 		        
 		      end if
 		      
@@ -2364,6 +2455,9 @@ End
 	#tag Constant, Name = kPlaceholder_TARGET_APP_CPU_WORDSIZE, Type = String, Dynamic = False, Default = \"TARGET_APP_CPU_WORDSIZE", Scope = Public
 	#tag EndConstant
 
+	#tag Constant, Name = kPlaceholder_TARGET_APP_FULL_SPECIFIER, Type = String, Dynamic = False, Default = \"TARGET_APP_FULL_SPECIFIER", Scope = Public
+	#tag EndConstant
+
 	#tag Constant, Name = kPlaceholder_TARGET_APP_SCRIPT_DIR, Type = String, Dynamic = False, Default = \"TARGET_APP_SCRIPT_DIR", Scope = Public
 	#tag EndConstant
 
@@ -2377,6 +2471,9 @@ End
 	#tag EndConstant
 
 	#tag Constant, Name = kPlaceholder_TARGET_APP_SPECIFIER, Type = String, Dynamic = False, Default = \"TARGET_APP_SPECIFIER", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = kPlaceholder_TARGET_APP_SPECIFIER_VERSION, Type = String, Dynamic = False, Default = \"TARGET_APP_SPECIFIER_VERSION", Scope = Public
 	#tag EndConstant
 
 	#tag Constant, Name = kPlaceholder_TARGET_APP_VERSION, Type = String, Dynamic = False, Default = \"TARGET_APP_VERSION", Scope = Public
