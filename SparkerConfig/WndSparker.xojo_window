@@ -444,7 +444,7 @@ End
 		          else
 		            Dim placeholder as String
 		            placeholder = possiblePlaceholder.Uppercase()
-		            if not IsSystemPlaceholder(placeholder) then
+		            if not IsInternalPlaceholder(placeholder) then
 		              io_placeholders.Value(placeholder) = ""
 		            end if
 		            textChopped = textChopped.mid(placeholderEndPos + Len(kPlaceholderPrefixSuffix))
@@ -501,7 +501,7 @@ End
 		            value = Trim(value)
 		            
 		            if isConditionalFolder and value <> "" and selector <> "" then
-		              if not IsSystemPlaceholder(selector) then
+		              if not IsInternalPlaceholder(selector) then
 		                if not fPlaceholderDict.HasKey(selector) then
 		                  fPlaceholderDict.Value(selector) = value
 		                end if
@@ -751,7 +751,7 @@ End
 		      Dim appVersionPlaceholder as String
 		      if targetApp <> kAnyValue_TARGET_APP then
 		        
-		        appVersionPlaceholder = "TARGET_" + Uppercase(targetApp) + "_VERSION"
+		        appVersionPlaceholder = "TARGET_" + PlaceholderAppName(targetApp) + "_VERSION"
 		        
 		        Dim targetAppVersion as String
 		        targetAppVersion = fPlaceholderDict.Value(appVersionPlaceholder)
@@ -1247,6 +1247,43 @@ End
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function IsInternalPlaceholder(in_placeholder as String) As Boolean
+		  Dim retVal as Boolean
+		  
+		  do
+		    
+		    try 
+		      
+		      Const kSystemPlaceholderPrefix = "TARGET_"
+		      
+		      if Left(in_placeHolder, LEN(kSystemPlaceholderPrefix)) = kSystemPlaceholderPrefix  then
+		        retVal = true
+		        exit
+		      end if
+		      
+		      if in_placeholder = "APP_MAPPER_SCRIPT" then
+		        retVal = true
+		        Exit
+		      end if
+		      
+		      if in_placeholder = "DESPACED_TARGET_NAME" then
+		        retVal = true
+		        Exit
+		      end if
+		      
+		    catch e as RuntimeException
+		      LogError CurrentMethodName, "Throws " + e.Message
+		    end try
+		    
+		  Loop Until true
+		  
+		  return retVal
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function IsReservedSubitem(in_item as FolderItem) As Boolean
 		  Dim retVal as Boolean
 		  
@@ -1326,15 +1363,6 @@ End
 		  Loop Until true
 		  
 		  return retVal
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function IsSystemPlaceholder(in_placeholder as String) As Boolean
-		  Const kSystemPlaceholderPrefix = "TARGET_"
-		  
-		  return Left(in_placeHolder, LEN(kSystemPlaceholderPrefix)) = kSystemPlaceholderPrefix 
-		  
 		End Function
 	#tag EndMethod
 
@@ -1570,6 +1598,28 @@ End
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function PlaceholderAppName(in_appName as String) As String
+		  Dim retVal as String
+		  
+		  do
+		    
+		    try 
+		      
+		      retVal = Uppercase(in_appName).ReplaceAll(" ", "_")
+		      
+		    catch e as RuntimeException
+		      LogError CurrentMethodName, "Throws " + e.Message
+		    end try
+		    
+		  Loop Until true
+		  
+		  return retVal
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function ProcessIncludes(in_file as FolderItem) As String
 		  Dim fileText as String
 		  
@@ -1784,7 +1834,7 @@ End
 		      end if
 		      
 		      Dim mapJSONStr as String
-		      mapJSONStr = ReadFileText(mapFile)
+		      mapJSONStr = RemoveJSONComments(ReadFileText(mapFile))
 		      
 		      Dim mapJSON as JSONMBS
 		      mapJSON = new JSONMBS(mapJSONStr)
@@ -1961,11 +2011,11 @@ End
 		        fPlaceholderDict.Value(kPlaceholder_TARGET_CC_VERSION_SELECTED) = targetCCVersionSelected
 		        
 		        Dim appVersionPlaceholder as String
-		        appVersionPlaceholder = "TARGET_" + Uppercase(targetApp) + "_VERSION"
+		        appVersionPlaceholder = "TARGET_" + PlaceholderAppName(targetApp) + "_VERSION"
 		        fPlaceholderDict.Value(appVersionPlaceholder) = appVersion
 		        
 		        Dim appSpecifierVersionPlaceholder as String
-		        appSpecifierVersionPlaceholder = "TARGET_" + Uppercase(targetApp) + "_SPECIFIER_VERSION"
+		        appSpecifierVersionPlaceholder = "TARGET_" + PlaceholderAppName(targetApp) + "_SPECIFIER_VERSION"
 		        fPlaceholderDict.Value(appSpecifierVersionPlaceholder) = appSpecifierVersion
 		        
 		        Dim targetAppScriptDirMacJSON as JSONMBS
@@ -2061,6 +2111,117 @@ End
 		  Loop Until true
 		  
 		  return fileText
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function RemoveJSONComments(in_jsonStr as String) As String
+		  Dim retVal as String
+		  
+		  
+		  do
+		    
+		    try 
+		      
+		      const kState_Idle = 0
+		      const kState_SeenSlash = 1
+		      const kState_SeenSlashSlash = 2
+		      const kState_SeenSlashAsterisk = 3
+		      const kState_SeenSlashAsteriskAsterisk = 4
+		      const kState_SeenQuote = 5
+		      const kState_SeenQuoteEscape = 6
+		      const kState_SeenDoubleQuote = 7
+		      const kState_SeenDoubleQuoteEscape = 8
+		      
+		      Dim state as integer
+		      state = kState_Idle
+		      
+		      Dim pos as integer
+		      pos = 1
+		      
+		      while pos <= Len(in_jsonStr) 
+		        
+		        Dim ch as String
+		        ch = in_jsonStr.Mid(pos, 1)
+		        pos = pos + 1
+		        
+		        select case state
+		        case kState_Idle
+		          if ch = "/" then
+		            state = kState_SeenSlash
+		          elseif ch = "'" then
+		            retVal = retVal + ch
+		            state = kState_SeenQuote
+		          elseif ch = """" then
+		            retVal = retVal + ch
+		            state = kState_SeenDoubleQuote
+		          else
+		            retVal = retVal + ch
+		          end if
+		        case kState_SeenQuote
+		          if ch = "'" then
+		            retVal = retVal + ch
+		            state = kState_Idle
+		          elseif ch = "\" then
+		            retVal = retVal + ch
+		            state = kState_SeenQuoteEscape
+		          else
+		            retVal = retVal + ch
+		          end if
+		        case kState_SeenQuoteEscape
+		          retVal = retVal + ch
+		          state = kState_SeenQuote
+		        case kState_SeenDoubleQuote
+		          if ch = """" then
+		            retVal = retVal + ch
+		            state = kState_Idle
+		          elseif ch = "\" then
+		            retVal = retVal + ch
+		            state = kState_SeenDoubleQuoteEscape
+		          else
+		            retVal = retVal + ch
+		          end if
+		        case kState_SeenDoubleQuoteEscape
+		          retVal = retVal + ch
+		          state = kState_SeenDoubleQuote
+		        case kState_SeenSlash
+		          if ch = "/" then
+		            state = kState_SeenSlashSlash
+		          elseif ch = "*" then
+		            state = kState_SeenSlashAsterisk
+		          else
+		            retVal = retVal + "/" + ch
+		            state = kState_Idle
+		          end if
+		        case kState_SeenSlashSlash
+		          if ch = Chr(10) or ch = Chr(13) then
+		            state = kState_Idle
+		          end if
+		        case kState_SeenSlashAsterisk
+		          if ch = "*" then
+		            state = kState_SeenSlashAsteriskAsterisk
+		          end if
+		        case kState_SeenSlashAsteriskAsterisk
+		          if ch = "/" then
+		            state = kState_Idle
+		          else
+		            state = kState_SeenSlashAsterisk
+		          end if
+		        end select
+		        
+		      wend
+		      
+		      if state = kState_SeenSlash then
+		        retVal = retVal + "/"
+		      end if
+		      
+		    catch e as RuntimeException
+		      LogError CurrentMethodName, "Throws " + e.Message
+		    end try
+		    
+		  Loop Until true
+		  
+		  return retVal
 		End Function
 	#tag EndMethod
 
