@@ -2,7 +2,17 @@
 
 Customizable generic project templating system. Create a template starter project and auto-customize it to set up starter projects with a few clicks.
 
-# Recompilation Notes
+## Rationale
+
+https://github.com/zwettemaan/Sparker/wiki
+
+## Sparker projects:
+
+https://github.com/zwettemaan/CEPSparker
+
+https://github.com/zwettemaan/JSXSparker
+
+## Recompilation Notes
 
 The `devtools/macCodeSignID.txt` file is missing from the git
 repo, and that's by design. You need to add your own file. 
