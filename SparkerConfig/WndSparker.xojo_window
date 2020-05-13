@@ -1993,7 +1993,13 @@ End
 		            Dim appCode as JSONMBS
 		            appCode = iter.Child(kPlaceholder_TARGET_APP_CODE)
 		            if appCode <> nil then
-		              appMapperScript = appMapperScript +         "case """ + appCode.ValueString() + """:"
+		              Dim appCodeStr as String
+		              appCodeStr = appCode.ValueString()
+		              if appCodeStr = "PHSH" then
+		                // Photoshop has two codes
+		                appMapperScript = appMapperScript +         "case ""PHXS"":"
+		              end if
+		              appMapperScript = appMapperScript +         "case """ + appCodeStr + """:"
 		              appMapperScript = appMapperScript +             "retVal = """ + iter.Name + """;"
 		              appMapperScript = appMapperScript +             "break;"
 		            end if
