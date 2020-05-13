@@ -705,6 +705,14 @@ End
 		      winConfigSettingsTos.WriteLine "SET " + kPlaceholder_TARGET_APP_CODE + "=" + targetAppCode
 		      specialKeyDict.Value(kPlaceholder_TARGET_APP_CODE) = true
 		      
+		      if fPlaceholderDict.HasKey(kPlaceholder_TARGET_APP_UXP_CODE) then
+		        Dim targetAppUXPCode as String
+		        targetAppUXPCode = GetFromDict(fPlaceholderDict, kPlaceholder_TARGET_APP_UXP_CODE, kDefault_TARGET_APP_UXP_CODE)
+		        macConfigSettingsTos.WriteLine "export " + kPlaceholder_TARGET_APP_UXP_CODE + "=" + dQ(targetAppUXPCode)
+		        winConfigSettingsTos.WriteLine "SET " + kPlaceholder_TARGET_APP_UXP_CODE + "=" + targetAppUXPCode
+		        specialKeyDict.Value(kPlaceholder_TARGET_APP_UXP_CODE) = true
+		      end if
+		      
 		      Dim targetAppCpuWordSize as String
 		      targetAppCpuWordSize = GetFromDict(fPlaceholderDict, kPlaceholder_TARGET_APP_CPU_WORDSIZE, kDefault_TARGET_APP_CPU_WORDSIZE)
 		      macConfigSettingsTos.WriteLine "export " + kPlaceholder_TARGET_APP_CPU_WORDSIZE + "=" + dQ(targetAppCpuWordSize)
@@ -1895,6 +1903,15 @@ End
 		        
 		        fPlaceholderDict.Value(kPlaceholder_TARGET_APP_CODE) = targetAppCode
 		        
+		        Dim targetAppUXPCodeJSON as JSONMBS
+		        targetAppUXPCodeJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_UXP_CODE)
+		        if targetAppUXPCodeJSON <> nil then
+		          Dim targetAppUXPCode as String
+		          targetAppUXPCode = targetAppUXPCodeJSON.ValueString()
+		          
+		          fPlaceholderDict.Value(kPlaceholder_TARGET_APP_UXP_CODE) = targetAppUXPCode
+		        end if
+		        
 		        Dim targetFileNameExtensionJSON as JSONMBS
 		        targetFileNameExtensionJSON = appDataJSON.Child(kPlaceholder_TARGET_FILENAME_EXTENSION)
 		        if targetFileNameExtensionJSON = nil then
@@ -2012,6 +2029,32 @@ End
 		        appMapperScript = appMapperScript + "}"
 		        
 		        fPlaceholderDict.Value(kPlaceholder_APP_MAPPER_SCRIPT) = appMapperScript
+		        
+		        Dim appUXPMapperScript as String
+		        appUXPMapperScript = appUXPMapperScript + "function mapAppUXPId(appUXPId) {"
+		        appUXPMapperScript = appUXPMapperScript +     "var retVal;"
+		        appUXPMapperScript = appUXPMapperScript +     "switch (appUXPId) {"
+		        iter = mapJSON.ChildNode
+		        while iter <> nil 
+		          if iter.Name <> kMapKey_DefaultForAny then
+		            Dim appUXPCode as JSONMBS
+		            appUXPCode = iter.Child(kPlaceholder_TARGET_APP_UXP_CODE)
+		            if appUXPCode <> nil then
+		              Dim appUXPCodeStr as String
+		              appUXPCodeStr = appUXPCode.ValueString()
+		              appUXPMapperScript = appUXPMapperScript +         "case """ + appUXPCodeStr + """:"
+		              appUXPMapperScript = appUXPMapperScript +             "retVal = """ + iter.Name + """;"
+		              appUXPMapperScript = appUXPMapperScript +             "break;"
+		            end if
+		          end if
+		          iter = iter.nextNode
+		        wend
+		        
+		        appUXPMapperScript = appUXPMapperScript +     "}"
+		        appUXPMapperScript = appUXPMapperScript +     "return retVal;"
+		        appUXPMapperScript = appUXPMapperScript + "}"
+		        
+		        fPlaceholderDict.Value(kPlaceholder_APP_UXP_MAPPER_SCRIPT) = appUXPMapperScript
 		        
 		        fPlaceholderDict.Value(kPlaceholder_TARGET_CC_VERSION) = targetCCVersion
 		        fPlaceholderDict.Value(kPlaceholder_TARGET_CC_VERSION_SELECTED) = targetCCVersionSelected
@@ -2508,6 +2551,9 @@ End
 	#tag Constant, Name = kDefault_TARGET_APP_CPU_WORDSIZE, Type = String, Dynamic = False, Default = \"64", Scope = Public
 	#tag EndConstant
 
+	#tag Constant, Name = kDefault_TARGET_APP_UXP_CODE, Type = String, Dynamic = False, Default = \"", Scope = Public
+	#tag EndConstant
+
 	#tag Constant, Name = kDefault_TARGET_CC_LANGUAGE_CODE, Type = String, Dynamic = False, Default = \"en_US", Scope = Public
 	#tag EndConstant
 
@@ -2607,6 +2653,9 @@ End
 	#tag Constant, Name = kPlaceholder_APP_MAPPER_SCRIPT, Type = String, Dynamic = False, Default = \"APP_MAPPER_SCRIPT", Scope = Public
 	#tag EndConstant
 
+	#tag Constant, Name = kPlaceholder_APP_UXP_MAPPER_SCRIPT, Type = String, Dynamic = False, Default = \"APP_UXP_MAPPER_SCRIPT", Scope = Public
+	#tag EndConstant
+
 	#tag Constant, Name = kPlaceholder_DESPACED_TARGET_NAME, Type = String, Dynamic = False, Default = \"DESPACED_TARGET_NAME", Scope = Public
 	#tag EndConstant
 
@@ -2641,6 +2690,9 @@ End
 	#tag EndConstant
 
 	#tag Constant, Name = kPlaceholder_TARGET_APP_SPECIFIER_VERSION, Type = String, Dynamic = False, Default = \"TARGET_APP_SPECIFIER_VERSION", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = kPlaceholder_TARGET_APP_UXP_CODE, Type = String, Dynamic = False, Default = \"TARGET_APP_UXP_CODE", Scope = Public
 	#tag EndConstant
 
 	#tag Constant, Name = kPlaceholder_TARGET_APP_VERSION, Type = String, Dynamic = False, Default = \"TARGET_APP_VERSION", Scope = Public
