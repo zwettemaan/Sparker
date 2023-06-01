@@ -25,10 +25,10 @@ which is my Apple developer ID for codesigning. You need your own code signing i
 
 https://developer.apple.com/
 
-The `SparkerConfig/RegisterMBS.xojo_xml_code` file is missing from the git repo,
+The `SparkerConfig/Register_MBS.xojo_xml_code` file is missing from the git repo,
 also by design. It contains my MBS license registration info.
 
-It defines a class 'RegisterMBS' with a single shared method 'Register()' which registers the MBS plugins to
+It defines a class 'Register_MBS' with a single shared method 'Register()' which registers the MBS plugins to
 my license.
 
 You need to use your own MBS license information.

@@ -241,7 +241,7 @@ Begin Window WndSparker
       Underline       =   False
       Value           =   False
       Visible         =   True
-      VisualState     =   "0"
+      VisualState     =   0
       Width           =   215
    End
 End
@@ -1121,7 +1121,7 @@ End
 		      
 		      // This code is not in the repository. It registers the MonkeyBread plugins
 		      // Comment this out to run a debug session in Xojo, or add your own license code
-		      RegisterMBS.Register
+		      Register_MBS.Register
 		      
 		      Dim appFolder as FolderItem
 		      appFolder = GetFolderItem("")
@@ -1231,6 +1231,10 @@ End
 		      if fBinaryFileExtensionDict = nil then
 		        fBinaryFileExtensionDict = new Dictionary
 		        fBinaryFileExtensionDict.Value("") = true
+		        fBinaryFileExtensionDict.Value("tgz") = true
+		        fBinaryFileExtensionDict.Value("gz") = true
+		        fBinaryFileExtensionDict.Value("zip") = true
+		        fBinaryFileExtensionDict.Value("tar") = true
 		        fBinaryFileExtensionDict.Value("png") = true
 		        fBinaryFileExtensionDict.Value("jpg") = true
 		        fBinaryFileExtensionDict.Value("jpeg") = true
