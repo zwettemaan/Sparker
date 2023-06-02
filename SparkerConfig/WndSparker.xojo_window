@@ -1097,7 +1097,8 @@ End
 		    Init
 		    
 		    if not CheckIfPristine then
-		      LogFatalError CurrentMethodName, "This project folder has been previously configured. Please unzip the original folder and try again with a clean copy"
+		      
+		      LogFatalError CurrentMethodName, kErrorMessage_CannotRun
 		    end if
 		    
 		    if fErrorMessage <> "" then
@@ -2571,6 +2572,10 @@ End
 	#tag EndConstant
 
 	#tag Constant, Name = kDefault_TARGET_NAME, Type = String, Dynamic = False, Default = \"Sparker", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = kErrorMessage_CannotRun, Type = String, Dynamic = False, Default = \"This project folder has been previously configured. Please unzip the original folder and try again with a clean copy", Scope = Public
+		#Tag Instance, Platform = Mac OS, Language = Default, Definition  = \"Either this project has not been dequarantined (you need to run initialSetupConfigApp.command) or this project folder has been previously configured (please unzip the original folder and try again with a clean copy)."
 	#tag EndConstant
 
 	#tag Constant, Name = kFileNameSuffix_LogFile, Type = String, Dynamic = False, Default = \"ConfigLog.txt", Scope = Public
