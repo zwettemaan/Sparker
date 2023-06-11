@@ -1650,6 +1650,27 @@ End
 		        includesFolder = nil
 		      end if
 		      
+		      if includesFolder <> nil then
+		        
+		        Dim sharedIncludeFile as FolderItem
+		        sharedIncludeFile = includesFolder.Child(kFilename_SharedHeader)
+		        
+		        if sharedIncludeFile.Exists then
+		          
+		          Dim includeText as String
+		          includeText = ReadFileText(sharedIncludeFile)
+		          
+		          Dim includeLines() as String
+		          includeLines = SplitIntoLines(includeText)
+		          
+		          for includeLineIdx as integer = UBound(includeLines) downto 0
+		            lines.AddRowAt 0, includeLines(includeLineIdx)
+		          next
+		          
+		        end if
+		        
+		      end if
+		      
 		      Dim changed as Boolean
 		      
 		      do
@@ -1772,6 +1793,33 @@ End
 		              condition = true
 		            end if
 		            
+		          elseif StartsWith(kPreprocessorCommand_Define, trimmedLine) then
+		            
+		            if condition then
+		              
+		              Dim expression as String
+		              expression = Trim(trimmedLine.Mid(kPreprocessorCommand_Define.Len + 1))
+		              
+		              Dim splitLine() as String
+		              splitLine = expression.Split(" ")
+		              
+		              Dim variableName as String
+		              variableName = Trim(splitLine(0))
+		              
+		              Dim value as String
+		              value = Trim(expression.Mid(splitLine(0).Len + 1))
+		              
+		              if  _
+		                (value.left(1) = Chr(34) and value.Right(1) = Chr(34)) _
+		                or  _
+		                (value.left(1) = Chr(39) and value.Right(1) = Chr(39)) _
+		                then
+		                value = value.Mid(2, value.len - 2)
+		              end if
+		              
+		              fPlaceholderDict.Value(variableName) = value
+		              
+		            end if
 		          else
 		            
 		            if condition then
@@ -2596,6 +2644,9 @@ End
 	#tag Constant, Name = kFileName_ProjectConfig, Type = String, Dynamic = False, Default = \"ProjectConfig.txt", Scope = Public
 	#tag EndConstant
 
+	#tag Constant, Name = kFilename_SharedHeader, Type = String, Dynamic = False, Default = \"sharedheader.i", Scope = Public
+	#tag EndConstant
+
 	#tag Constant, Name = kFileName_WindowsBuildSettings, Type = String, Dynamic = False, Default = \"buildSettings.bat", Scope = Public
 	#tag EndConstant
 
@@ -2723,6 +2774,9 @@ End
 	#tag EndConstant
 
 	#tag Constant, Name = kPlaceholder_TARGET_NAME, Type = String, Dynamic = False, Default = \"TARGET_NAME", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = kPreprocessorCommand_Define, Type = String, Dynamic = False, Default = \"$define", Scope = Public
 	#tag EndConstant
 
 	#tag Constant, Name = kPreprocessorCommand_Else, Type = String, Dynamic = False, Default = \"$else", Scope = Public
