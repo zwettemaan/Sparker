@@ -8,7 +8,7 @@ Begin Window WndSparker
    FullScreen      =   False
    FullScreenButton=   False
    HasBackColor    =   False
-   Height          =   430
+   Height          =   768
    ImplicitInstance=   True
    LiveResize      =   "True"
    MacProcID       =   0
@@ -17,14 +17,14 @@ Begin Window WndSparker
    MaxWidth        =   32000
    MenuBar         =   1754114047
    MenuBarVisible  =   True
-   MinHeight       =   430
+   MinHeight       =   768
    MinimizeButton  =   True
-   MinWidth        =   600
+   MinWidth        =   1024
    Placement       =   0
    Resizeable      =   True
    Title           =   "Sparker Config"
    Visible         =   True
-   Width           =   600
+   Width           =   1024
    Begin Listbox LstConfigStrings
       AutoDeactivate  =   True
       AutoHideScrollbars=   True
@@ -43,7 +43,7 @@ Begin Window WndSparker
       GridLinesVertical=   0
       HasHeading      =   True
       HeadingIndex    =   -1
-      Height          =   269
+      Height          =   607
       HelpTag         =   ""
       Hierarchical    =   False
       Index           =   -2147483648
@@ -66,14 +66,14 @@ Begin Window WndSparker
       TabPanelIndex   =   0
       TabStop         =   True
       TextFont        =   "System"
-      TextSize        =   0.0
+      TextSize        =   14.0
       TextUnit        =   0
       Top             =   52
       Transparent     =   False
       Underline       =   False
       UseFocusRing    =   True
       Visible         =   True
-      Width           =   560
+      Width           =   984
       _ScrollOffset   =   0
       _ScrollWidth    =   -1
    End
@@ -90,7 +90,7 @@ Begin Window WndSparker
       Index           =   -2147483648
       InitialParent   =   ""
       Italic          =   False
-      Left            =   500
+      Left            =   924
       LockBottom      =   True
       LockedInPosition=   False
       LockLeft        =   False
@@ -103,7 +103,7 @@ Begin Window WndSparker
       TextFont        =   "System"
       TextSize        =   0.0
       TextUnit        =   0
-      Top             =   390
+      Top             =   728
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -122,7 +122,7 @@ Begin Window WndSparker
       Index           =   -2147483648
       InitialParent   =   ""
       Italic          =   False
-      Left            =   408
+      Left            =   832
       LockBottom      =   True
       LockedInPosition=   False
       LockLeft        =   False
@@ -135,7 +135,7 @@ Begin Window WndSparker
       TextFont        =   "System"
       TextSize        =   0.0
       TextUnit        =   0
-      Top             =   390
+      Top             =   728
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -174,7 +174,7 @@ Begin Window WndSparker
       Transparent     =   False
       Underline       =   False
       Visible         =   True
-      Width           =   560
+      Width           =   984
    End
    Begin Label LblHelpText
       AutoDeactivate  =   True
@@ -205,11 +205,11 @@ Begin Window WndSparker
       TextFont        =   "System"
       TextSize        =   0.0
       TextUnit        =   0
-      Top             =   333
+      Top             =   671
       Transparent     =   False
       Underline       =   False
       Visible         =   True
-      Width           =   560
+      Width           =   984
    End
    Begin CheckBox ChkShowAdvanced
       AllowAutoDeactivate=   True
@@ -236,7 +236,7 @@ Begin Window WndSparker
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   390
+      Top             =   728
       Transparent     =   False
       Underline       =   False
       Value           =   False
@@ -845,7 +845,15 @@ End
 		      end if
 		      
 		      if IsBinaryFile(in_sourceItem) then
+		        
 		        in_sourceItem.CopyFileTo in_targetItem
+		        
+		        Dim fileNameExtension as String
+		        fileNameExtension = GetFileNameExtensionLowerCase(in_sourceItem)
+		        if fileNameExtension = kFileNameExtension_PlatformZIP then
+		          UnzipNativeFolder(in_targetItem, in_targetItem.Parent)
+		        end if
+		        
 		        Exit
 		      end if
 		      
@@ -957,7 +965,7 @@ End
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function GetFileNameExtension(in_file as FolderItem) As String
+		Function GetFileNameExtensionLowerCase(in_file as FolderItem) As String
 		  Dim retVal as String
 		  
 		  do
@@ -968,7 +976,7 @@ End
 		        Exit
 		      end if
 		      
-		      retVal = GetFileNameExtension(in_file.Name)
+		      retVal = GetFileNameExtensionLowerCase(in_file.Name)
 		      
 		    catch e as RuntimeException
 		      LogError CurrentMethodName, "Throws " + e.Message
@@ -981,7 +989,7 @@ End
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function GetFileNameExtension(in_fileNameOrPath as String) As String
+		Function GetFileNameExtensionLowerCase(in_fileNameOrPath as String) As String
 		  Dim retVal as String
 		  
 		  do
@@ -999,7 +1007,7 @@ End
 		        Exit
 		      end if
 		      
-		      retVal = components(UBound(components))
+		      retVal = components(UBound(components)).Lowercase()
 		      
 		    catch e as RuntimeException
 		      LogError CurrentMethodName, "Throws " + e.Message
@@ -1208,7 +1216,7 @@ End
 		      end if
 		      
 		      Dim fileNameExtension as String
-		      fileNameExtension = GetFileNameExtension(in_fileName)
+		      fileNameExtension = GetFileNameExtensionLowerCase(in_fileName)
 		      
 		      retVal = IsBinaryFileNameExtension(fileNameExtension)
 		      
@@ -1235,6 +1243,8 @@ End
 		        fBinaryFileExtensionDict.Value("tgz") = true
 		        fBinaryFileExtensionDict.Value("gz") = true
 		        fBinaryFileExtensionDict.Value("zip") = true
+		        // NZIP is used by PluginInstaller
+		        fBinaryFileExtensionDict.Value(kFileNameExtension_PlatformZIP) = true
 		        fBinaryFileExtensionDict.Value("tar") = true
 		        fBinaryFileExtensionDict.Value("png") = true
 		        fBinaryFileExtensionDict.Value("jpg") = true
@@ -2491,14 +2501,336 @@ End
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function UnzipFile(in_sourceFile as FolderItem, in_destinationFile as FolderItem) As Boolean
+		  Dim retVal as Boolean
+		  
+		  Do 
+		    
+		    Try
+		      
+		      if in_sourceFile = nil then
+		        logError CurrentMethodName, "in_sourceFile is nil"
+		        Exit
+		      end if
+		      
+		      if not in_sourceFile.Exists then
+		        logError CurrentMethodName, "in_sourceFile is does not exist"
+		        Exit
+		      end if
+		      
+		      if in_destinationFile = nil then
+		        logError CurrentMethodName, "in_destinationFile is nil"
+		        Exit
+		      end if
+		      
+		      if in_destinationFile.Exists then
+		        in_destinationFile.Remove()
+		      end if
+		      
+		      if in_destinationFile.Exists then
+		        logError CurrentMethodName, "in_destinationFile not cleared"
+		      end if
+		      
+		      Dim reader as ArchiveReaderMBS
+		      reader = new ArchiveReaderMBS()
+		      reader.SupportFormatZip()
+		      reader.SetFormat(ArchiveReaderMBS.kFormatZip)
+		      
+		      If not reader.OpenFile(in_sourceFile) Then
+		        logError CurrentMethodName, "failed to open"
+		        Exit
+		      end if
+		      
+		      logNote CurrentMethodName, "opened " + in_sourceFile.NativePath
+		      
+		      Dim entry As ArchiveEntryMBS 
+		      entry = reader.NextHeader
+		      
+		      // Unzip first file in zip, independent of relative path inside zip
+		      
+		      While entry <> Nil
+		        
+		        Do
+		          
+		          Dim relativePath as String
+		          relativePath = entry.PathName
+		          
+		          Dim pathSegments() as String
+		          pathSegments = relativePath.Split(SEPARATOR_ZIP_INTERNAL_PATH)
+		          
+		          Dim lastSegment as String
+		          lastSegment = pathSegments.Pop()
+		          
+		          Dim isFolder as Boolean
+		          if lastSegment = "" then
+		            Exit
+		          end if
+		          
+		          Dim stream As BinaryStream
+		          
+		          Try
+		            
+		            stream = BinaryStream.Create(in_destinationFile, True)
+		            
+		            logNote CurrentMethodName, "created " + in_destinationFile.NativePath
+		            
+		            if entry.Size > 0 then
+		              Dim data As MemoryBlock
+		              data  = reader.ReadDataMemory(entry.Size)
+		              stream.Write(data)
+		            end if
+		            
+		            stream.Close()
+		            
+		            logNote CurrentMethodName, "closed " + in_destinationFile.NativePath
+		            entry = nil
+		            
+		          Catch e As RuntimeException
+		            logError CurrentMethodName, "throws " + e.Message
+		          End Try
+		          
+		        Loop Until true
+		        
+		        entry = reader.NextHeader
+		        
+		      Wend
+		      
+		      reader.Close()
+		      
+		      logNote CurrentMethodName, "closed " + in_sourceFile.NativePath
+		      
+		      retVal = true
+		      
+		    Catch e As RuntimeException
+		      logError CurrentMethodName, "throws " + e.Message
+		    End Try
+		    
+		  Loop Until true
+		  
+		  return retVal
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function UnzipFolder(in_sourceFile as FolderItem, in_destinationFolder as FolderItem, in_relativePathsToOmit as Dictionary = nil, in_fileNamesToOmit as Dictionary = nil) As Boolean
+		  Dim retVal as Boolean
+		  
+		  Do 
+		    
+		    Try
+		      
+		      if in_sourceFile = nil then
+		        logError CurrentMethodName, "in_sourceFile is nil"
+		        Exit
+		      end if
+		      
+		      if not in_sourceFile.Exists then
+		        logError CurrentMethodName, "in_sourceFile is does not exist"
+		        Exit
+		      end if
+		      
+		      if in_destinationFolder = nil then
+		        logError CurrentMethodName, "in_destinationFolder is nil"
+		        Exit
+		      end if
+		      
+		      Dim destinationFolderParent as FolderItem
+		      destinationFolderParent = in_destinationFolder.Parent
+		      
+		      if not destinationFolderParent.IsFolder then
+		        logError CurrentMethodName, "destinationFolderParent does not exist"
+		        Exit
+		      end if
+		      
+		      Dim reader as ArchiveReaderMBS
+		      reader = new ArchiveReaderMBS()
+		      reader.SupportFormatZip()
+		      reader.SetFormat(ArchiveReaderMBS.kFormatZip)
+		      
+		      If not reader.OpenFile(in_sourceFile) Then
+		        logError CurrentMethodName, "failed to open"
+		        Exit
+		      end if
+		      
+		      logNote CurrentMethodName, "opened " + in_sourceFile.NativePath
+		      
+		      Dim entry As ArchiveEntryMBS 
+		      entry = reader.NextHeader
+		      
+		      While entry <> Nil
+		        
+		        Do
+		          
+		          Dim relativePath as String
+		          relativePath = entry.PathName
+		          
+		          Dim pathSegments() as String
+		          pathSegments = relativePath.Split(SEPARATOR_ZIP_INTERNAL_PATH)
+		          
+		          Dim lastSegment as String
+		          lastSegment = pathSegments.Pop()
+		          
+		          Dim isFolder as Boolean
+		          if lastSegment = "" then
+		            isFolder = true
+		          else
+		            if in_fileNamesToOmit <> nil and in_fileNamesToOmit.HasKey(lastSegment) then
+		              Exit
+		            end if
+		          end if
+		          
+		          Dim parentFolder as FolderItem
+		          parentFolder = destinationFolderParent
+		          
+		          Dim omit as Boolean
+		          relativePath = ""
+		          for segmentIdx as integer = 0 to UBound(pathSegments)
+		            Dim pathSegment as String
+		            pathSegment = pathSegments(segmentIdx)
+		            if relativePath <> "" then
+		              relativePath = relativePath + SEPARATOR_ZIP_INTERNAL_PATH
+		            end if
+		            relativePath = relativePath + pathSegment
+		            if in_relativePathsToOmit <> nil and in_relativePathsToOmit.HasKey(relativePath) then
+		              omit = true
+		              Exit
+		            end if
+		            Dim childFolder as FolderItem
+		            childFolder = parentFolder.Child(pathSegment)
+		            if not childFolder.Exists then
+		              childFolder.CreateFolder()
+		            end if
+		            parentFolder = childFolder
+		          next
+		          
+		          if omit or isFolder then
+		            Exit
+		          end if
+		          
+		          Dim stream As BinaryStream
+		          
+		          Try
+		            
+		            Dim outputFile as FolderItem
+		            outputFile = parentFolder.Child(lastSegment)
+		            
+		            stream = BinaryStream.Create(outputFile, True)
+		            
+		            logNote CurrentMethodName, "created " + outputFile.NativePath
+		            
+		            if entry.size > 0 then
+		              Dim data As MemoryBlock
+		              data  = reader.ReadDataMemory(entry.Size)
+		              stream.Write(data)
+		            end if
+		            
+		            stream.Close()
+		            
+		            logNote CurrentMethodName, "closed " + outputFile.NativePath
+		            
+		          Catch e As RuntimeException
+		            logError CurrentMethodName, "throws " + e.Message
+		          End Try
+		          
+		        Loop Until true
+		        
+		        entry = reader.NextHeader
+		        
+		      Wend
+		      
+		      reader.Close()
+		      
+		      logNote CurrentMethodName, "closed " + in_sourceFile.NativePath
+		      
+		      retVal = true
+		      
+		    Catch e As RuntimeException
+		      logError CurrentMethodName, "throws " + e.Message
+		    End Try
+		    
+		  Loop Until true
+		  
+		  return retVal
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub UnzipNativeFolder(in_nativeZIP as FolderItem, in_targetDir as FolderItem)
+		  do 
+		    
+		    try 
+		      
+		      if in_targetDir = nil or not in_targetDir.IsFolder then
+		        LogError CurrentMethodName, "invalid in_targetDir"
+		        Exit
+		      end if
+		      
+		      Dim fileNameExtension as String
+		      fileNameExtension = GetFileNameExtensionLowerCase(in_nativeZIP)
+		      if fileNameExtension <> kFileNameExtension_PlatformZIP then
+		        LogError CurrentMethodName, "invalid file name extension"
+		        Exit
+		      end if
+		      
+		      Dim fileName as String
+		      fileName = in_nativeZIP.Name
+		      fileName = fileName.Left(fileName.Length - 1 - kFileNameExtension_PlatformZIP.Length)
+		      
+		      Dim unzippedDir as FolderItem
+		      unzippedDir = in_targetDir.Child(fileName)
+		      if unzippedDir = nil then
+		        logError CurrentMethodName, "unzippedDir is nil"
+		        Exit
+		      end if
+		      
+		      if unzippedDir.Exists then
+		        logError CurrentMethodName, "unzipped dir already exists"
+		        Exit
+		      end if
+		      
+		      #if TargetMacOS
+		        
+		        // Use command-line unzip on Mac for native zips
+		        
+		        Dim command as String
+		        command = "/usr/bin/unzip " + in_nativeZIP.ShellPath + " -d " + in_targetDir.ShellPath
+		        
+		        Dim sh as Shell
+		        sh = new Shell
+		        sh.ExecuteMode = Shell.ExecuteModes.Synchronous
+		        sh.execute command
+		        
+		        if not unzippedDir.Exists then
+		          logError CurrentMethodName, "failed to unzip"
+		          Exit
+		        end if
+		        
+		      #else
+		        
+		        unzippedDir.CreateFolder()
+		        
+		        if not UnzipFolder(in_nativeZIP, unzippedDir) then
+		          logError CurrentMethodName, "unzip failed"
+		          Exit
+		        end if
+		        
+		      #endif
+		      
+		    catch e as RuntimeException
+		      LogError CurrentMethodName, "Throws " + e.Message
+		    end try
+		    
+		  Loop until true
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub UpdateUI()
 		  do 
 		    
 		    Dim showAdvanced as Boolean
 		    showAdvanced = ChkShowAdvanced.Value
-		    
-		    LstConfigStrings.TextSize = 10
-		    LstConfigStrings.DefaultRowHeight = 14
 		    
 		    LstConfigStrings.DeleteAllRows
 		    
@@ -2624,6 +2956,9 @@ End
 
 	#tag Constant, Name = kErrorMessage_CannotRun, Type = String, Dynamic = False, Default = \"This project folder has been previously configured. Please unzip the original folder and try again with a clean copy", Scope = Public
 		#Tag Instance, Platform = Mac OS, Language = Default, Definition  = \"Either this project has not been dequarantined (you need to run initialSetupConfigApp.command) or this project folder has been previously configured (please unzip the original folder and try again with a clean copy)."
+	#tag EndConstant
+
+	#tag Constant, Name = kFileNameExtension_PlatformZIP, Type = String, Dynamic = False, Default = \"nzip", Scope = Public
 	#tag EndConstant
 
 	#tag Constant, Name = kFileNameSuffix_LogFile, Type = String, Dynamic = False, Default = \"ConfigLog.txt", Scope = Public
@@ -2795,6 +3130,9 @@ End
 	#tag EndConstant
 
 	#tag Constant, Name = kPreprocessorCommand_Or, Type = String, Dynamic = False, Default = \"$Or", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = SEPARATOR_ZIP_INTERNAL_PATH, Type = String, Dynamic = False, Default = \"/", Scope = Public
 	#tag EndConstant
 
 

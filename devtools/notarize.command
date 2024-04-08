@@ -10,20 +10,19 @@ export PROJECT_SOURCE_DIR="${PROJECT_ROOT_DIR}SparkerConfig/"
 
 export PLIST_ENTITLEMENTS_FILE="${PROJECT_SOURCE_DIR}SparkerConfig.entitlements.plist"
 
-export CODESIGN_ID=`head -n 1 macCodeSignID.txt`
+if [ "${TIGHTENER_GIT_ROOT}" = "" ]; then
+	echo "Need Tightener installed"
+	exit
+fi
+	
+. "${TIGHTENER_GIT_ROOT}BuildScripts/setEnv"
 
 cd "${PROJECT_ROOT_DIR}SparkerConfig/Builds - SparkerConfig/"
 
 zip -y -r ./SparkerConfig.zip "OS X 64 bit"
 
-echo "Enter notarization password (see 1 Password, 'Apple developer'):"
-read NOTARIZATION_PASSWORD
-
-echo "Enter Mac's login password:"
-sudo xcode-select -s /Applications/Xcode.app
-
-xcrun notarytool submit --password "${NOTARIZATION_PASSWORD}" --apple-id "dev@rorohiko.com"  --team-id "UF54MCK725" --wait ./SparkerConfig.zip
+xcrun notarytool submit --password ${ROROHIKO_NOTARY_PASSWORD}  --apple-id ${ROROHIKO_NOTARY_APPLE_ID} --team-id ${ROROHIKO_NOTARY_TEAM_ID} --wait ./SparkerConfig.zip
 
 echo "To see log, use"
 echo ""
-echo "    xcrun notarytool log --apple-id "dev@rorohiko.com"  --team-id "UF54MCK725" --password "${NOTARIZATION_PASSWORD}" HEXID"
+echo "    xcrun notarytool log --apple-id \"${ROROHIKO_NOTARY_APPLE_ID}\"  --team-id \"${ROROHIKO_NOTARY_TEAM_ID}\" --password \"${ROROHIKO_NOTARY_PASSWORD}\" HEXID"

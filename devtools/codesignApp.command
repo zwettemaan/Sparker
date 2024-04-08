@@ -10,13 +10,18 @@ export PROJECT_SOURCE_DIR="${PROJECT_ROOT_DIR}SparkerConfig/"
 
 export PLIST_ENTITLEMENTS_FILE="${PROJECT_SOURCE_DIR}SparkerConfig.entitlements.plist"
 
-export CODESIGN_ID=`head -n 1 macCodeSignID.txt`
+if [ "${TIGHTENER_GIT_ROOT}" = "" ]; then
+	echo "Need Tightener installed"
+	exit
+fi
+	
+. "${TIGHTENER_GIT_ROOT}BuildScripts/setEnv"
 
 cd "${PROJECT_ROOT_DIR}SparkerConfig/Builds - SparkerConfig/OS X 64 bit/"
 find . -name ".DS_Store" | while read a; do rm "$a"; done
 find . -name "__MACOSX" | while read a; do rm -rf "$a"; done
 xattr -cr "SparkerConfig.app"
-codesign --options=runtime --timestamp --entitlements "$PLIST_ENTITLEMENTS_FILE" -vvv --verbose --deep --force --sign "$CODESIGN_ID" "SparkerConfig.app"
+codesign --options=runtime --timestamp --entitlements "$PLIST_ENTITLEMENTS_FILE" -vvv --verbose --deep --force --sign "${ROROHIKO_DEV_ID_APPLE}" "SparkerConfig.app"
 
 cd "${PROJECT_ROOT_DIR}SparkerConfig/Builds - SparkerConfig/Windows/SparkerConfig/"
 
@@ -24,13 +29,9 @@ rm -f SparkerConfig.exe.unsigned
 
 mv SparkerConfig.exe SparkerConfig.exe.unsigned
 
-# See 1Password for password
 # brew install osslsigncode
 
-echo "Password is the code signing password for the signing certificate - see 1 Password, 'Signing Password for Certificates/codesign'"
-
-osslsigncode sign -pkcs12 /Users/kris/ownCloud/RorohikoNotShared/Certificates/Rorohiko_Signing_Certificate_2026.pfx -askpass -n "SparkerConfig" -i "Rorohiko" -t http://timestamp.digicert.com -h sha2 -in SparkerConfig.exe.unsigned -out SparkerConfig.exe
-
+osslsigncode sign -pkcs12 ${ROROHIKO_CERTIFICATE_FILE_PATH} -pass "${ROROHIKO_CERTIFICATE_PASSWORD}" -t ${CODESIGN_TIMESTAMP_SERVER} -in SparkerConfig.exe.unsigned -out SparkerConfig.exe
 rm -f SparkerConfig.exe.unsigned
 
 popd > /dev/null
