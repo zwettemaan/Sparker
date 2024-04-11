@@ -1911,7 +1911,9 @@ End
 		      mapJSON = new JSONMBS(mapJSONStr)
 		      
 		      Dim defaultForAnyJSON as JSONMBS
-		      defaultForAnyJSON = mapJSON.Child(kMapKey_DefaultForAny)
+		      if mapJSON.HasKey(kMapKey_DefaultForAny) then
+		        defaultForAnyJSON = mapJSON.Child(kMapKey_DefaultForAny)
+		      end if
 		      
 		      Dim defaultForAny as String
 		      if defaultForAnyJSON = nil then
@@ -1921,7 +1923,9 @@ End
 		      end if
 		      
 		      Dim targetAppSelected as String
-		      targetAppSelected = fPlaceholderDict.Value(kPlaceholder_TARGET_APP)
+		      if fPlaceholderDict.HasKey(kPlaceholder_TARGET_APP) then
+		        targetAppSelected = fPlaceholderDict.Value(kPlaceholder_TARGET_APP)
+		      end if
 		      
 		      Dim targetApp as String
 		      if targetAppSelected = kAnyValue_TARGET_APP then
@@ -1933,7 +1937,9 @@ End
 		      fPlaceholderDict.Value(kPlaceholder_TARGET_APP_SELECTED) = targetAppSelected
 		      
 		      Dim targetCCVersion as String
-		      targetCCVersion = fPlaceholderDict.Value(kPlaceholder_TARGET_CC_VERSION)
+		      if fPlaceholderDict.HasKey(kPlaceholder_TARGET_CC_VERSION) then
+		        targetCCVersion = fPlaceholderDict.Value(kPlaceholder_TARGET_CC_VERSION)
+		      end if
 		      
 		      Dim targetCCVersionSelected as String
 		      targetCCVersionSelected = targetCCVersion
@@ -1948,14 +1954,18 @@ End
 		      if targetApp <> kAnyValue_TARGET_APP then
 		        
 		        Dim appDataJSON as JSONMBS
-		        appDataJSON = mapJSON.Child(targetApp)
+		        if mapJSON.HasKey(targetApp) then
+		          appDataJSON = mapJSON.Child(targetApp)
+		        end if
 		        if appDataJSON = nil then
 		          LogError CurrentMethodName, "app is not mapped"
 		          Exit
 		        end if
 		        
 		        Dim targetAppCodeJSON as JSONMBS
-		        targetAppCodeJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_CODE)
+		        if appDataJSON.HasKey(kPlaceholder_TARGET_APP_CODE) then
+		          targetAppCodeJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_CODE)
+		        end if
 		        if targetAppCodeJSON = nil then
 		          LogError CurrentMethodName, "TARGET_APP_CODE missing"
 		          Exit
@@ -1967,7 +1977,9 @@ End
 		        fPlaceholderDict.Value(kPlaceholder_TARGET_APP_CODE) = targetAppCode
 		        
 		        Dim targetAppUXPCodeJSON as JSONMBS
-		        targetAppUXPCodeJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_UXP_CODE)
+		        if appDataJSON.HasKey(kPlaceholder_TARGET_APP_UXP_CODE) then
+		          targetAppUXPCodeJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_UXP_CODE)
+		        end if
 		        if targetAppUXPCodeJSON <> nil then
 		          Dim targetAppUXPCode as String
 		          targetAppUXPCode = targetAppUXPCodeJSON.ValueString()
@@ -1976,7 +1988,9 @@ End
 		        end if
 		        
 		        Dim targetFileNameExtensionJSON as JSONMBS
-		        targetFileNameExtensionJSON = appDataJSON.Child(kPlaceholder_TARGET_FILENAME_EXTENSION)
+		        if appDataJSON.HasKey(kPlaceholder_TARGET_FILENAME_EXTENSION) then
+		          targetFileNameExtensionJSON = appDataJSON.Child(kPlaceholder_TARGET_FILENAME_EXTENSION)
+		        end if
 		        if targetFileNameExtensionJSON = nil then
 		          LogError CurrentMethodName, "TARGET_FILENAME_EXTENSION missing"
 		          Exit
@@ -1988,7 +2002,9 @@ End
 		        fPlaceholderDict.Value(kPlaceholder_TARGET_FILENAME_EXTENSION) = targetFileNameExtension
 		        
 		        Dim appSpecifierJSON as JSONMBS
-		        appSpecifierJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_SPECIFIER)
+		        if appDataJSON.HasKey(kPlaceholder_TARGET_APP_SPECIFIER) then
+		          appSpecifierJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_SPECIFIER)
+		        end if
 		        if appSpecifierJSON = nil then
 		          LogError CurrentMethodName, "TARGET_APP_SPECIFIER missing"
 		          Exit
@@ -2000,14 +2016,18 @@ End
 		        fPlaceholderDict.Value(kPlaceholder_TARGET_APP_SPECIFIER) = appSpecifier
 		        
 		        Dim appVersionsJSON as JSONMBS
-		        appVersionsJSON = appDataJSON.Child(kPlaceholder_TARGET_CC_VERSION)
+		        if appDataJSON.HasKey(kPlaceholder_TARGET_CC_VERSION) then
+		          appVersionsJSON = appDataJSON.Child(kPlaceholder_TARGET_CC_VERSION)
+		        end if
 		        if appVersionsJSON = nil then
 		          LogError CurrentMethodName, "TARGET_CC_VERSION missing"
 		          Exit
 		        end if
 		        
 		        Dim appVersionJSON as JSONMBS
-		        appVersionJSON = appVersionsJSON.Child(targetCCVersion)
+		        if appVersionsJSON.HasKey(targetCCVersion) then
+		          appVersionJSON = appVersionsJSON.Child(targetCCVersion)
+		        end if
 		        if appVersionJSON = nil then
 		          LogError CurrentMethodName, "targetCCVersion missing"
 		          Exit
@@ -2019,13 +2039,18 @@ End
 		        fPlaceholderDict.Value(kPlaceholder_TARGET_APP_VERSION) = appVersion
 		        
 		        Dim appSpecifierVersionsJSON as JSONMBS
-		        appSpecifierVersionsJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_SPECIFIER_VERSION)
+		        if appDataJSON.HasKey(kPlaceholder_TARGET_APP_SPECIFIER_VERSION) then
+		          appSpecifierVersionsJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_SPECIFIER_VERSION)
+		        end if
+		        
 		        if appSpecifierVersionsJSON = nil then
 		          appSpecifierVersionsJSON = appVersionsJSON
 		        end if
 		        
 		        Dim appSpecifierVersionJSON as JSONMBS
-		        appSpecifierVersionJSON = appSpecifierVersionsJSON.Child(targetCCVersion)
+		        if appSpecifierVersionsJSON.HasKey(targetCCVersion) then
+		          appSpecifierVersionJSON = appSpecifierVersionsJSON.Child(targetCCVersion)
+		        end if
 		        if appSpecifierVersionJSON = nil then
 		          LogError CurrentMethodName, "appSpecifierVersionJSON missing"
 		          Exit
@@ -2052,7 +2077,9 @@ End
 		        end if
 		        
 		        Dim targetSpecifierJSON as JSONMBS
-		        targetSpecifierJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_SPECIFIER)
+		        if appDataJSON.HasKey(kPlaceholder_TARGET_APP_SPECIFIER) then
+		          targetSpecifierJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_SPECIFIER)
+		        end if
 		        if targetSpecifierJSON = nil then
 		          LogError CurrentMethodName, "TARGET_APP_SPECIFIER) missing"
 		          Exit
@@ -2068,10 +2095,13 @@ End
 		        appMapperScript = appMapperScript +     "var retVal;"
 		        appMapperScript = appMapperScript +     "switch (appId) {"
 		        iter = mapJSON.ChildNode
+		        DIm appNodeCount as integer
 		        while iter <> nil 
 		          if iter.Name <> kMapKey_DefaultForAny then
 		            Dim appCode as JSONMBS
-		            appCode = iter.Child(kPlaceholder_TARGET_APP_CODE)
+		            if iter.HasKey(kPlaceholder_TARGET_APP_CODE) then
+		              appCode = iter.Child(kPlaceholder_TARGET_APP_CODE)
+		            end if
 		            if appCode <> nil then
 		              Dim appCodeStr as String
 		              appCodeStr = appCode.ValueString()
@@ -2082,6 +2112,7 @@ End
 		              appMapperScript = appMapperScript +         "case """ + appCodeStr + """:"
 		              appMapperScript = appMapperScript +             "retVal = """ + iter.Name + """;"
 		              appMapperScript = appMapperScript +             "break;"
+		              appNodeCount = appNodeCount + 1
 		            end if
 		          end if
 		          iter = iter.nextNode
@@ -2091,6 +2122,10 @@ End
 		        appMapperScript = appMapperScript +     "return retVal;"
 		        appMapperScript = appMapperScript + "}"
 		        
+		        if appNodeCount = 0 then
+		          appMapperScript = ""
+		        end if
+		        
 		        fPlaceholderDict.Value(kPlaceholder_APP_MAPPER_SCRIPT) = appMapperScript
 		        
 		        Dim appUXPMapperScript as String
@@ -2098,16 +2133,20 @@ End
 		        appUXPMapperScript = appUXPMapperScript +     "var retVal;"
 		        appUXPMapperScript = appUXPMapperScript +     "switch (appUXPId) {"
 		        iter = mapJSON.ChildNode
+		        DIm appUXPNodeCount as integer
 		        while iter <> nil 
 		          if iter.Name <> kMapKey_DefaultForAny then
 		            Dim appUXPCode as JSONMBS
-		            appUXPCode = iter.Child(kPlaceholder_TARGET_APP_UXP_CODE)
+		            if iter.HasKey(kPlaceholder_TARGET_APP_UXP_CODE) then
+		              appUXPCode = iter.Child(kPlaceholder_TARGET_APP_UXP_CODE)
+		            end if
 		            if appUXPCode <> nil then
 		              Dim appUXPCodeStr as String
 		              appUXPCodeStr = appUXPCode.ValueString()
 		              appUXPMapperScript = appUXPMapperScript +         "case """ + appUXPCodeStr + """:"
 		              appUXPMapperScript = appUXPMapperScript +             "retVal = """ + iter.Name + """;"
 		              appUXPMapperScript = appUXPMapperScript +             "break;"
+		              appUXPNodeCount = appUXPNodeCount + 1
 		            end if
 		          end if
 		          iter = iter.nextNode
@@ -2116,6 +2155,10 @@ End
 		        appUXPMapperScript = appUXPMapperScript +     "}"
 		        appUXPMapperScript = appUXPMapperScript +     "return retVal;"
 		        appUXPMapperScript = appUXPMapperScript + "}"
+		        
+		        if appUXPNodeCount = 0 then
+		          appUXPMapperScript = ""
+		        end if
 		        
 		        fPlaceholderDict.Value(kPlaceholder_APP_UXP_MAPPER_SCRIPT) = appUXPMapperScript
 		        
@@ -2131,7 +2174,9 @@ End
 		        fPlaceholderDict.Value(appSpecifierVersionPlaceholder) = appSpecifierVersion
 		        
 		        Dim targetAppScriptDirMacJSON as JSONMBS
-		        targetAppScriptDirMacJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_SCRIPT_DIR_MAC)
+		        if appDataJSON.HasKey(kPlaceholder_TARGET_APP_SCRIPT_DIR_MAC) then
+		          targetAppScriptDirMacJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_SCRIPT_DIR_MAC)
+		        end if
 		        if targetAppScriptDirMacJSON = nil then
 		          LogError CurrentMethodName, "TARGET_APP_SCRIPT_DIR_MAC missing"
 		          Exit
@@ -2143,7 +2188,9 @@ End
 		        fPlaceholderDict.Value(kPlaceholder_TARGET_APP_SCRIPT_DIR_MAC) = targetAppScriptDirMac
 		        
 		        Dim targetAppScriptDirWindowsJSON as JSONMBS
-		        targetAppScriptDirWindowsJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_SCRIPT_DIR_WINDOWS)
+		        if appDataJSON.HasKey(kPlaceholder_TARGET_APP_SCRIPT_DIR_WINDOWS) then
+		          targetAppScriptDirWindowsJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_SCRIPT_DIR_WINDOWS)
+		        end if
 		        if targetAppScriptDirWindowsJSON = nil then
 		          LogError CurrentMethodName, "TARGET_APP_SCRIPT_DIR_WINDOWS missing"
 		          Exit
@@ -2159,7 +2206,9 @@ End
 		        
 		        Dim targetAppFullSpecifier as String
 		        Dim targetAppFullSpecifierJSON as JSONMBS
-		        targetAppFullSpecifierJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_FULL_SPECIFIER)
+		        if appDataJSON.HasKey(kPlaceholder_TARGET_APP_FULL_SPECIFIER) then
+		          targetAppFullSpecifierJSON = appDataJSON.Child(kPlaceholder_TARGET_APP_FULL_SPECIFIER)
+		        end if
 		        if targetAppFullSpecifierJSON <> nil then
 		          targetAppFullSpecifier = targetAppFullSpecifierJSON.ValueString()
 		          targetAppFullSpecifier = ReplacePlaceholders(targetAppFullSpecifier)
