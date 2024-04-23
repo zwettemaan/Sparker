@@ -17,7 +17,7 @@ fi
 	
 . "${TIGHTENER_GIT_ROOT}BuildScripts/setEnv"
 
-cd "${PROJECT_ROOT_DIR}SparkerConfig/Builds - SparkerConfig/OS X 64 bit/"
+cd "${PROJECT_ROOT_DIR}SparkerConfig/Builds - SparkerConfig/macOS Universal/"
 find . -name ".DS_Store" | while read a; do rm "$a"; done
 find . -name "__MACOSX" | while read a; do rm -rf "$a"; done
 xattr -cr "SparkerConfig.app"

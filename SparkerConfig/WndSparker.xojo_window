@@ -492,6 +492,10 @@ End
 		            
 		          else
 		            
+		            if IsBinaryFile(subItem) then
+		              Exit
+		            end if
+		            
 		            Dim isConditionalFolder as Boolean
 		            Dim selector as String
 		            Dim value as String
@@ -1241,6 +1245,8 @@ End
 		        fBinaryFileExtensionDict = new Dictionary
 		        fBinaryFileExtensionDict.Value("") = true
 		        fBinaryFileExtensionDict.Value("tgz") = true
+		        fBinaryFileExtensionDict.Value("framework") = true
+		        fBinaryFileExtensionDict.Value("dll") = true
 		        fBinaryFileExtensionDict.Value("gz") = true
 		        fBinaryFileExtensionDict.Value("zip") = true
 		        // NZIP is used by PluginInstaller

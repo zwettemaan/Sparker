@@ -19,9 +19,11 @@ fi
 
 cd "${PROJECT_ROOT_DIR}SparkerConfig/Builds - SparkerConfig/"
 
-zip -y -r ./SparkerConfig.zip "OS X 64 bit"
+zip -q -y -r ./SparkerConfig.zip "macOS Universal"
 
 xcrun notarytool submit --password ${ROROHIKO_NOTARY_PASSWORD}  --apple-id ${ROROHIKO_NOTARY_APPLE_ID} --team-id ${ROROHIKO_NOTARY_TEAM_ID} --wait ./SparkerConfig.zip
+
+rm ./SparkerConfig.zip
 
 echo "To see log, use"
 echo ""
