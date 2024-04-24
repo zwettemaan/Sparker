@@ -8,8 +8,6 @@ export PROJECT_ROOT_DIR=`dirname "$SPCF_DEV_TOOLS_DIR"`/
 
 export PROJECT_SOURCE_DIR="${PROJECT_ROOT_DIR}SparkerConfig/"
 
-export PLIST_ENTITLEMENTS_FILE="${PROJECT_SOURCE_DIR}SparkerConfig.entitlements.plist"
-
 if [ "${TIGHTENER_GIT_ROOT}" = "" ]; then
 	echo "Need Tightener installed"
 	exit
