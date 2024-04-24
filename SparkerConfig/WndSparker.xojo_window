@@ -335,6 +335,65 @@ End
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function CopyFileOrFolder(in_source As FolderItem, in_parentDestination As FolderItem) As Boolean
+		  Dim retVal as Boolean
+		  
+		  do
+		    try 
+		      
+		      if not in_parentDestination.IsFolder then
+		        LogError CurrentMethodName, "in_parentDestination does not exist"
+		        Exit
+		      end if
+		      
+		      If not in_source.IsFolder Then
+		        if in_source.Exists then
+		          in_source.Remove()
+		        end if
+		        in_source.CopyTo(in_parentDestination)
+		        retVal = in_source.LastErrorCode = 0
+		        Exit
+		      end if
+		      
+		      Dim subParentDestination As FolderItem
+		      subParentDestination = in_parentDestination.Child(in_source.Name)
+		      if not subParentDestination.Exists then
+		        subParentDestination.CreateFolder()
+		      end if
+		      
+		      If not subParentDestination.IsFolder Then
+		        LogError CurrentMethodName, "cannot create folder"
+		        Exit
+		      End If
+		      
+		      retVal = true
+		      For Each file As FolderItem In in_source.Children
+		        
+		        If file = Nil Then
+		          LogError CurrentMethodName, "file is nil"
+		          retVal = false
+		          Exit
+		        End If
+		        
+		        If Not CopyFileOrFolder(file, subParentDestination) Then
+		          LogError CurrentMethodName, "cannot create folder"
+		          retVal = false
+		          Exit
+		        End If
+		        
+		      Next
+		      
+		    catch e as RuntimeException
+		      LogError CurrentMethodName, "Throws " + e.Message
+		    end try
+		    
+		  Loop Until true
+		  
+		  return retVal
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function dQ(in_s as String) As String
 		  Dim retVal as String
 		  
@@ -910,6 +969,16 @@ End
 		        Exit
 		      end if
 		      
+		      Dim fileNameExtension as String
+		      fileNameExtension = GetFileNameExtensionLowerCase(in_sourceItem)
+		      
+		      if IsBinaryFile(in_sourceItem) and fileNameExtension <> "" then
+		        if not CopyFileOrFolder(in_sourceItem, in_targetItem.Parent) then
+		          LogError CurrentMethodName, "failed to copy"
+		        end if
+		        Exit
+		      end if
+		      
 		      if not in_targetItem.Exists then
 		        in_targetItem.CreateAsFolder
 		      end if
@@ -1244,8 +1313,10 @@ End
 		      if fBinaryFileExtensionDict = nil then
 		        fBinaryFileExtensionDict = new Dictionary
 		        fBinaryFileExtensionDict.Value("") = true
+		        fBinaryFileExtensionDict.Value("plist") = true
 		        fBinaryFileExtensionDict.Value("tgz") = true
 		        fBinaryFileExtensionDict.Value("framework") = true
+		        fBinaryFileExtensionDict.Value("dylib") = true
 		        fBinaryFileExtensionDict.Value("dll") = true
 		        fBinaryFileExtensionDict.Value("gz") = true
 		        fBinaryFileExtensionDict.Value("zip") = true
