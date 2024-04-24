@@ -347,11 +347,14 @@ End
 		      end if
 		      
 		      If not in_source.IsFolder Then
-		        if in_source.Exists then
-		          in_source.Remove()
+		        Dim targetFile as FolderItem
+		        targetFile = in_parentDestination.Child(in_source.name)
+		        if targetFile.Exists then
+		          targetFile.Remove()
 		        end if
 		        in_source.CopyTo(in_parentDestination)
-		        retVal = in_source.LastErrorCode = 0
+		        targetFile = in_parentDestination.Child(in_source.name)
+		        retVal = targetFile.Exists
 		        Exit
 		      end if
 		      
